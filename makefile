@@ -1,15 +1,15 @@
-MODULE_DIR=
+MODULE_DIR=example
 MODULE_DIR2=
 SRC_SOURCE=*.c $(MODULE_DIR)/*.c $(MODULE_DIR2)/*.c
 CC=gcc
 CFLAGS_WARN = -g
 
 LIBPATH = -L. \
-			-L/usr/local/ffmpeg/lib
-LIBVAR = -lavformat -lavcodec -lz -lswresample  -lavutil -pthread -lm
+			-L/home/yswan/install-ffmpeg/lib
+LIBVAR = -lavformat -lavcodec -lswresample  -lavutil -pthread -lm
 DEFINE =
 INCLUDE = -I. \
-		-I/usr/local/ffmpeg/include
+		-I/home/yswan/install-ffmpeg/include
 
 SOURCE = $(wildcard $(SRC_SOURCE))
 OBJS = $(patsubst %.c,%.o,$(SOURCE))
