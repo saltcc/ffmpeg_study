@@ -9,11 +9,31 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-int decode_mp3()
+void decode_it(AVCodecContext *pCodecCtx, AVPacket *packet, AVFrame *frame, FILE *fout)
 {
-    const char *input = "test.mp3";
-    const char *output = "test.pcm";
+    int ret = 0;
+    int i = 0;
+    int ch = 0;
 
+    if ((ret = avcodec_send_packet(pCodecCtx, packet)) < 0){
+        return;
+    }
+
+    int data_size = av_get_bytes_per_sample(pCodecCtx->sample_fmt);
+
+    while ((ret = avcodec_receive_frame(pCodecCtx, frame)) >= 0){
+        for (i = 0; i < frame->nb_samples; i++){
+            for (ch = 0; ch < pCodecCtx->channels; ch++){
+                fwrite(frame->data[ch] + data_size * i, 1, data_size, fout);
+            }
+        }
+    }
+    
+    return;
+}
+
+int decode_audio(const char *input, const char *output)
+{
     FILE *fout = fopen(output, "wb");
     int ret = -1;
 
@@ -62,6 +82,8 @@ int decode_mp3()
 
     AVCodecContext *pCodecCtx = avcodec_alloc_context3(pCodec);
 
+    avcodec_parameters_to_context(pCodecCtx, pFormatCtx->streams[audio_stream_index]->codecpar);
+
     if (pCodecCtx == NULL){
         av_log(NULL, AV_LOG_INFO, "avcodec_alloc_content3 fail\n");
         goto over;
@@ -78,29 +100,13 @@ int decode_mp3()
 
     int got_frame = 0;
     while (av_read_frame(pFormatCtx, packet) >= 0){
-        int ret = 0;
-        int i = 0;
-        int ch = 0;
-        if (packet->size <= 0)
-            continue;
-            
-        if ((ret = avcodec_send_packet(pCodecCtx, packet)) < 0){
+
+        if (packet->size <= 0){
             continue;
         }
-
-        int data_size = av_get_bytes_per_sample(pCodecCtx->sample_fmt);
-
-        while ((ret = avcodec_receive_frame(pCodecCtx, frame)) >= 0){
-            
-            for (i = 0; i < frame->nb_samples; i++){
-                for (ch = 0; ch < pCodecCtx->channels; ch++){
-                    fwrite(frame->data[ch] + data_size * i, 1, data_size, fout);
-                }
-            }
-        }
+        if (packet->stream_index == audio_stream_index)
+            decode_it(pCodecCtx, packet, frame, fout);
     }
-
-    fclose(fout);
 
 over:
     if (pFormatCtx)
@@ -111,6 +117,8 @@ over:
         av_frame_free(&frame);
     if (packet)
         av_packet_free(&packet);
+    if (fout)
+        fclose(fout);
 
     return 0;
 }

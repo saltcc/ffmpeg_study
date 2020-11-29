@@ -9,11 +9,13 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-extern int decode_mp3();
+extern int decode_audio();
 
 int main()
 {
-    decode_mp3();
+    const char *input = "test.mp4";
+    const char *output = "test.pcm";
+    decode_audio(input, output);
 
     return 0;
 }
