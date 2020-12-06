@@ -9,7 +9,8 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-extern int decode_audio();
+extern int decode_audio(const char *,const char *);
+extern int audio_encode(const char *input, const char *output);
 
 int main()
 {
@@ -17,5 +18,8 @@ int main()
     const char *output = "test.pcm";
     decode_audio(input, output);
 
+    const char *input1 = "test.pcm";
+    const char *output1 = "test.aac";
+    audio_encode(input1, output1);
     return 0;
 }
