@@ -6,7 +6,7 @@ CFLAGS_WARN = -g
 
 LIBPATH = -L. \
 			-L/home/yswan/install-ffmpeg/lib
-LIBVAR = -lavformat -lavcodec -lswresample  -lavutil -pthread -lm
+LIBVAR = -lavformat -lavcodec -lavutil -lswresample -pthread -lm -lz
 DEFINE =
 INCLUDE = -I. \
 		-I/home/yswan/install-ffmpeg/include
